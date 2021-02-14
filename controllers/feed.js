@@ -18,7 +18,7 @@ exports.getPosts = async (req, res, next) => {
     res.status(200).json({
       message: 'Fetched posts successfully.',
       posts: posts,
-      totalItems: totalItems
+      totalItems: totalItems,
     });
   } catch (err) {
     if (!err.statusCode) {
@@ -47,18 +47,19 @@ exports.createPost = async (req, res, next) => {
     title: title,
     content: content,
     imageUrl: imageUrl,
-    creator: req.userId
+    creator: req.userId,
   });
   try {
     await post.save();
     const user = await User.findById(req.userId);
     user.posts.push(post);
-    await user.save();
+    const savedUser = await user.save();
     res.status(201).json({
       message: 'Post created successfully!',
       post: post,
-      creator: { _id: user._id, name: user.name }
+      creator: { _id: user._id, name: user.name },
     });
+    return savedUser;
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
